@@ -1,51 +1,94 @@
-# 📈 Stock Valuation App
 
-A web-based stock valuation tool for performing **fundamental analysis** of companies, with a focus on **Indian markets**. This app uses classic valuation methods like:
+---
+title: NiveshLakshya
+emoji: 📊
+colorFrom: indigo
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
 
-- **Discounted Cash Flow (DCF)**
-- **Dividend Discount Model (DDM)**
-- **Price-to-Earnings (P/E)**
-- **Price-to-Book (P/B)**
-- **Graham Number**
+# 📊 NiveshLakshya
 
-Built with **Streamlit** for interactive analysis and easy use by retail investors, financial analysts, and students.
+[![HuggingFace Spaces](https://img.shields.io/badge/Hosted%20on-HuggingFace-%23ff8a65)](https://huggingface.co/spaces/somnathsingh31/NiveshLakshya)
+
+**NiveshLakshya** is a web-based stock valuation tool designed to perform **fundamental analysis** of companies, especially for the **Indian stock market**. It uses five classic valuation methods to estimate intrinsic value and generate detailed reports, including visual plots.
+
+Built with **Streamlit** for ease of use, it's ideal for retail investors, financial analysts, and students looking to make informed decisions.
 
 ---
 
-## 🚀 Features
 
-- Input key financial data and instantly get intrinsic valuation
-- Choose investor sentiment: *Optimistic*, *Neutral*, or *Pessimistic*
-- Visual comparison of valuation methods
-- Full valuation report with investment recommendation
-- Deployed using [Hugging Face Spaces](https://huggingface.co/spaces)
+## 🧮 Valuation Methods Used
+
+This tool supports the following valuation techniques:
+
+* **PE Valuation** – Based on earnings and adjusted P/E multiples
+* **PB Valuation** – Uses book value and Return on Equity (ROE)
+* **Dividend Discount Model (DDM)** – Projects future dividends and discounts them
+* **Discounted Cash Flow (DCF)** – Forecasts free cash flows and discounts them
+* **Graham Number** – Conservative formula using EPS and book value
+
+Based on these, the app provides **intrinsic value estimates** and **comprehensive valuation reports** with supporting plots.
+
+---
+
+## 🌟 Key Features
+
+* Supports **three investor types**: *Neutral*, *Optimistic*, and *Pessimistic*
+* Generates visual and tabular comparisons of valuation outputs
+* Final investment recommendation based on valuation confidence
+* Simple and intuitive interface powered by Streamlit
+* Publicly hosted on [Hugging Face Spaces](https://huggingface.co/spaces/somnathsingh31/NiveshLakshya)
+
+---
+
+## 🔎 Where to Find Financial Data
+
+You can collect financial data manually using:
+
+* [StockEdge](https://web.stockedge.com/) – Preferred for its user-friendly interface
+* [Moneycontrol](https://www.moneycontrol.com/)
+
+### Recommended: **StockEdge**
+
+1. Search for a stock on [StockEdge](https://web.stockedge.com/)
+2. Go to the **Fundamental** section
+3. Under **Ratios**, explore the dropdown menus to find:
+
+   * EPS (Earnings Per Share)
+   * Book Value
+   * Dividend
+   * Free Cash Flow
+   * ROE, Profit Margin, and other key metrics
 
 ---
 
 ## 🧠 How It Works
 
-The backend logic is implemented in Python and uses `pydantic` for robust financial data validation. Each valuation method is tailored to suit Indian market characteristics such as conservative multipliers and risk-adjusted discount rates.
+You enter basic financial data for a stock, choose your investor type (*Neutral*, *Optimistic*, or *Pessimistic*), and the app instantly calculates intrinsic values using multiple valuation models.
 
-The Streamlit frontend provides an intuitive interface to enter data, select sentiment profile, and generate a full valuation report.
+The app is built using Python and Streamlit, offering a seamless way to generate full valuation reports — including charts and recommendations — all from your browser.
 
 ---
 
-## 📦 Installation
+## 📦 Installation (for local use)
 
 ```bash
-git clone https://github.com/your-username/stock-valuation.git
-cd stock-valuation
+git clone https://github.com/somnathsingh31/stock-valuation-python.git
+cd stock-valuation-python
 pip install -r requirements.txt
-streamlit run app/app.py
+streamlit run app.py
 ```
 
+---
 
-## Disclaimer
+## ⚠️ Disclaimer
 
-⚠️ **Disclaimer**
+This tool is intended for **educational and informational purposes only**.
+All outputs are based on standard models and the data you provide. It does **not constitute financial advice**, nor does it guarantee any investment outcome.
+Always do your own research or consult a certified financial advisor before investing.
 
-This tool is intended for **educational and informational purposes only**. 
-The valuation outcomes are based on static valuation models and user-provided inputs. 
-It **does not guarantee future stock performance** and should **not be used as financial advice**. 
-
-Please conduct your own due diligence or consult a licensed financial advisor before making any investment decisions.
+---
