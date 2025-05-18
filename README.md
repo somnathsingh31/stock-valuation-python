@@ -1,15 +1,3 @@
-
----
-title: NiveshLakshya
-emoji: 📊
-colorFrom: indigo
-colorTo: green
-sdk: docker
-app_port: 7860
-pinned: false
-license: mit
----
-
 # 📊 NiveshLakshya
 
 [![HuggingFace Spaces](https://img.shields.io/badge/Hosted%20on-HuggingFace-%23ff8a65)](https://huggingface.co/spaces/somnathsingh31/NiveshLakshya)
@@ -20,6 +8,20 @@ Built with **Streamlit** for ease of use, it's ideal for retail investors, finan
 
 ---
 
+## 🎥 Tutorial Videos
+
+To get started quickly, check out these walkthroughs:
+
+1. 📊 **Using the Application**: [Watch Video](https://www.youtube.com/watch?v=O8WO64kL2uA)  
+2. 📂 **Finding Financial Data**: [Watch Video](https://www.youtube.com/watch?v=sKDqJPivfF4)
+
+---
+
+## 💡 Tip
+
+If financial data (like EPS, FCF, or ROE) fluctuates significantly year to year, it's advisable to **use a 5-year average** to get more stable and realistic valuation results.
+
+---
 
 ## 🧮 Valuation Methods Used
 
