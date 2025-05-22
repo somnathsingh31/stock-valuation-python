@@ -47,6 +47,20 @@ Based on these, the app provides **intrinsic value estimates** and **comprehensi
 
 ---
 
+## 📈 New in v2: Technical Analysis with Buy & Sell Zones
+
+The upgraded version now includes **technical analysis** to complement fundamental valuation.
+
+* Detects **buy and sell zones** using moving averages, Bollinger Bands, Fibonacci levels, and price clusters
+* Visualizes **zones on price charts** with color-coded confidence levels (High, Medium, Low)
+* Identifies market correction context and oversold conditions
+* Generates a **comprehensive strategy** on when to start accumulating or reducing exposure
+* Offers a **confidence score and textual reasoning** based on price-action and technical signals
+
+This addition helps users make more **timing-aware decisions**, especially in volatile market phases.
+
+---
+
 ## 🔎 Where to Find Financial Data
 
 You can collect financial data manually using:

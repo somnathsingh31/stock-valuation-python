@@ -5,9 +5,9 @@ import os
 from datetime import datetime
 from io import StringIO
 from pathlib import Path
-from backend.stock_valuation import StockValuation, create_stock_valuation
+from backend.stock_valuation import create_stock_valuation
+from backend.technical_analysis import analyze_stock
 
-# App configuration
 st.set_page_config(
     page_title="Stock Valuation Tool",
     page_icon="📈",
@@ -15,14 +15,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Initialize session state for advanced settings only
 if "show_advanced" not in st.session_state:
     st.session_state.show_advanced = False
 
-# App title and description
-st.title("📈 NiveshLakshya: Indian Stock Valuation Tool")
+st.title("📈 NiveshLakshya: Stock Valuation & Technical Analysis Tool")
 st.markdown("""
-This tool helps you estimate the intrinsic value of Indian stocks using multiple valuation methods.
+This tool helps you estimate the intrinsic value of stocks using multiple valuation methods and technical analysis.
 Enter the financial metrics and click 'Run Valuation' to analyze.
 """)
 st.markdown("""
@@ -30,7 +28,6 @@ st.markdown("""
 investment advice or recommendations. Always consult your financial advisor before making investment decisions.
 """)
 
-# Create tabs for different sections
 tab1, tab2 = st.tabs(["Valuation Analysis", "Help"])
 
 with tab1:
@@ -40,61 +37,47 @@ with tab1:
     with input_col:
         st.subheader("Stock Information")
         company_name = st.text_input("Company Name", value="TCS")
-        current_price = st.number_input("Current Market Price (₹)", value=3800.0, min_value=0.01, 
-                                      help="Enter the current market price of the stock")
+        
+        ticker_col1, ticker_col2 = st.columns([2, 1])
+        with ticker_col1:
+            ticker_symbol = st.text_input("Stock Ticker Symbol", value="TCS")
+        with ticker_col2:
+            exchange = st.selectbox("Exchange", ["NSE (India)", "NYSE (US)", "NASDAQ (US)"])
+        
+        current_price = st.number_input("Current Market Price (₹)", value=3800.0, min_value=0.01)
         industry = st.selectbox("Industry", [
             "Information Technology", "Banking", "FMCG", "Pharmaceuticals",
             "Automobile", "Energy", "Telecommunications", "Manufacturing", "Other"
         ])
-        profile = st.selectbox("Investor Profile", ["Neutral", "Optimistic", "Pessimistic"],
-                             help="Choose profile based on your risk appetite")
+        profile = st.selectbox("Investor Profile", ["Neutral", "Optimistic", "Pessimistic"])
         
         with st.expander("Earnings & Valuation Metrics", expanded=True):
-            eps = st.number_input("Earnings Per Share (₹)", value=150.0, min_value=0.0,
-                               help="Net income divided by outstanding shares")
-            book_value = st.number_input("Book Value Per Share (₹)", value=700.0, min_value=0.0,
-                                      help="Company's assets minus liabilities per share")
-            industry_pe = st.number_input("Industry P/E Ratio", value=25.0, min_value=0.0, step=0.5,
-                                       help="Average price-to-earnings ratio for the industry")
-            eps_growth = st.slider("EPS Growth Rate (%)", 0.0, 100.0, 12.0, 0.5,
-                                help="Annual growth rate of earnings per share (maximum 100%)")
-            profit_margin = st.slider("Profit Margin (%)", 0.0, 100.0, 18.0, 0.5,
-                                   help="Net profit divided by revenue (maximum 100%)")
+            eps = st.number_input("Earnings Per Share (₹)", value=150.0, min_value=0.0)
+            book_value = st.number_input("Book Value Per Share (₹)", value=700.0, min_value=0.0)
+            industry_pe = st.number_input("Industry P/E Ratio", value=25.0, min_value=0.0, step=0.5)
+            eps_growth = st.slider("EPS Growth Rate (%)", 0.0, 100.0, 12.0, 0.5)
+            profit_margin = st.slider("Profit Margin (%)", 0.0, 100.0, 18.0, 0.5)
         
         with st.expander("Cash Flow & Dividend Metrics"):
-            dividend = st.number_input("Dividend Per Share (₹)", value=45.0, min_value=0.0,
-                                    help="Annual dividends paid per share")
-            fcf = st.number_input("Free Cash Flow Per Share (₹)", value=120.0, min_value=0.0,
-                               help="Operating cash flow minus capital expenditures per share")
+            dividend = st.number_input("Dividend Per Share (₹)", value=45.0, min_value=0.0)
+            fcf = st.number_input("Free Cash Flow Per Share (₹)", value=120.0, min_value=0.0)
         
         with st.expander("Financial Health Metrics"):
-            roe = st.slider("Return on Equity (%)", 0.0, 100.0, 23.0, 0.5,
-                         help="Net income divided by shareholders' equity (maximum 100%)")
-            de_ratio = st.number_input("Debt to Equity Ratio", value=0.3, min_value=0.0, step=0.1,
-                                    help="Total debt divided by shareholders' equity")
-            current_ratio = st.number_input("Current Ratio", value=2.1, min_value=0.01, step=0.1,
-                                         help="Current assets divided by current liabilities")
+            roe = st.slider("Return on Equity (%)", 0.0, 100.0, 23.0, 0.5)
+            de_ratio = st.number_input("Debt to Equity Ratio", value=0.3, min_value=0.0, step=0.1)
+            current_ratio = st.number_input("Current Ratio", value=2.1, min_value=0.01, step=0.1)
             
         with st.expander("Advanced Settings"):
             st.session_state.show_advanced = True
             
-            dcf_required_return = st.slider("DCF Required Return (%)", 8.0, 25.0, 15.0, 0.5, 
-                                         help="Required rate of return for DCF analysis")
-            dcf_terminal_growth = st.slider("DCF Terminal Growth (%)", 2.0, 8.0, 4.0, 0.5,
-                                         help="Long-term growth rate for DCF terminal value")
+            dcf_required_return = st.slider("DCF Required Return (%)", 8.0, 25.0, 15.0, 0.5)
+            dcf_terminal_growth = st.slider("DCF Terminal Growth (%)", 2.0, 8.0, 4.0, 0.5)
         
         run_button = st.button("🔍 Run Valuation", type="primary", use_container_width=True)
     
     with results_col:
         if not run_button:
             st.info("👈 Enter your stock data on the left and click 'Run Valuation' to analyze.")
-            
-            # A demo visualization to make the UI look more complete
-            st.subheader("Sample Valuation Chart")
-            
-            # Create a sample chart
-            import matplotlib.pyplot as plt
-            import numpy as np
             
             fig, ax = plt.subplots(figsize=(10, 6))
             methods = ['PE', 'PB', 'DCF', 'DDM', 'Graham']
@@ -112,27 +95,24 @@ with tab1:
             plt.legend()
             st.pyplot(fig)
             
-            # Add sample financial health indicators
             st.subheader("About Financial Health Indicators")
             help_cols = st.columns(3)
             
             with help_cols[0]:
-                st.metric("Return on Equity", "15-25%", help="Higher is better. >15% is typically good.")
+                st.metric("Return on Equity", "15-25%")
                 st.caption("🟢 Excellent: >20%\n🟡 Good: 12-20%\n🔴 Concerning: <12%")
                 
             with help_cols[1]:
-                st.metric("Debt to Equity", "<1.0", help="Lower is typically better for most industries.")
+                st.metric("Debt to Equity", "<1.0")
                 st.caption("🟢 Low Debt: <0.5\n🟡 Moderate: 0.5-1.0\n🔴 High Debt: >1.0")
                 
             with help_cols[2]:
-                st.metric("Current Ratio", ">1.5", help="Higher indicates better short-term liquidity.")
+                st.metric("Current Ratio", ">1.5")
                 st.caption("🟢 Strong: >1.5\n🟡 Adequate: 1.0-1.5\n🔴 Concern: <1.0")
     
-    # Main valuation logic
     if run_button:
         with st.spinner("Analyzing valuation..."):
             try:
-                # Input validation before processing
                 if not company_name.strip():
                     input_col.error("Company name cannot be empty.")
                 elif current_price <= 0:
@@ -143,7 +123,6 @@ with tab1:
                     if model is None:
                         input_col.error("Failed to create valuation model. Please check your inputs.")
                     else:
-                        # Set financial data
                         data_set_success = model.set_financial_data(
                             eps=eps,
                             book_value=book_value,
@@ -155,61 +134,49 @@ with tab1:
                             profit_margin=profit_margin / 100,
                             current_ratio=current_ratio,
                             pe_ratio_industry=industry_pe,
-                            industry=industry  # Pass the industry information to the backend
+                            industry=industry
                         )
                         
                         if not data_set_success:
                             input_col.error("Failed to set financial data. Please check your inputs.")
                         else:
                             if st.session_state.show_advanced:
-                                # First run PE, PB, and Graham which don't use the custom parameters
                                 model.pe_valuation()
                                 model.pb_valuation()
                                 model.graham_number()
                                 
-                                # Then run DCF and DDM with custom parameters
                                 model.dividend_discount_model(required_return=dcf_required_return/100, 
                                                             terminal_growth=dcf_terminal_growth/100)
                                 model.dcf_valuation(required_return=dcf_required_return/100, 
                                                    terminal_growth=dcf_terminal_growth/100)
                                 
-                                # Calculate final result without recalculating the individual methods
                                 result = model.intrinsic_value_calculator(profile=profile.lower())
                             else:
-                                # Standard calculation using default parameters
                                 result = model.intrinsic_value_calculator(profile=profile.lower())
                             
                             if "error" in result:
                                 input_col.error(f"Calculation error: {result['error']}")
                             else:
-                                # Display results in the right column
                                 with results_col:
                                     st.subheader("📊 Valuation Summary")
                                     
-                                    # Create metrics in a row
                                     metric_cols = st.columns(3)
                                     with metric_cols[0]:
                                         st.metric("Current Price", f"₹{current_price:,.2f}")
                                     with metric_cols[1]:
                                         st.metric("Intrinsic Value", f"₹{result['intrinsic_value']:,.2f}")
                                     with metric_cols[2]:
-                                        # Color code the potential based on whether it's positive or negative
-                                        # For positive potential, we want normal (green)
-                                        # For negative potential, we want inverse (red) 
                                         delta_color = "normal" if result['potential'] >= 0 else "inverse"
                                         
                                         st.metric("Potential", f"{result['potential']}%", 
                                                   delta=f"{result['potential']}%", 
                                                   delta_color=delta_color)
                                     
-                                    # Display recommendation
                                     recommendation = model.get_recommendation(result)
                                     st.info(f"**Recommendation:** {recommendation}", icon="📝")
                                     
-                                    # Display valuation methods breakdown in a tabular format
                                     st.subheader("Valuation Methods Breakdown")
                                     
-                                    # Convert individual valuations to DataFrame for better display
                                     valuations_data = []
                                     for method, value in result['individual_valuations'].items():
                                         if method in model.valuation_results:
@@ -226,7 +193,6 @@ with tab1:
                                         df_valuations = pd.DataFrame(valuations_data)
                                         st.dataframe(df_valuations, hide_index=True, use_container_width=True)
                                         
-                                        # Add export to CSV option for the valuation breakdown
                                         csv_data = pd.DataFrame({
                                             "Method": [item["Method"] for item in valuations_data],
                                             "Value (₹)": [item["Value (₹)"].replace("₹", "").replace(",", "") for item in valuations_data],
@@ -234,7 +200,6 @@ with tab1:
                                             "Weight (%)": [item["Weight (%)"].replace("%", "") for item in valuations_data]
                                         })
                                         
-                                        # Add company info and summary data
                                         summary_data = pd.DataFrame({
                                             "Metric": ["Company", "Industry", "Current Price", "Intrinsic Value", "Potential", "Recommendation"],
                                             "Value": [
@@ -247,7 +212,6 @@ with tab1:
                                             ]
                                         })
                                         
-                                        # Add financial metrics
                                         metrics_data = pd.DataFrame({
                                             "Metric": ["EPS", "Book Value", "Dividend", "Free Cash Flow", "EPS Growth", "ROE", 
                                                       "Debt to Equity", "Profit Margin", "Current Ratio", "Industry PE"],
@@ -257,7 +221,6 @@ with tab1:
                                             ]
                                         })
                                         
-                                        # Create download button for CSV export
                                         st.download_button(
                                             label="📊 Export Valuation Data to CSV",
                                             data=pd.concat([summary_data, csv_data, metrics_data]).to_csv(index=False).encode('utf-8'),
@@ -265,39 +228,32 @@ with tab1:
                                             mime="text/csv"
                                         )
                                     
-                                    # Plot valuation comparison
                                     st.subheader("📉 Valuation Chart")
                                     model.plot_valuation_comparison()
                                     
-                                    # Financial Health Indicators
                                     st.subheader("Financial Health Indicators")
                                     health_cols = st.columns(3)
                                     
                                     with health_cols[0]:
-                                        # ROE indicator
                                         roe_percentage = roe
                                         roe_status = "🟢 Excellent" if roe_percentage > 20 else "🟡 Good" if roe_percentage > 12 else "🔴 Concerning"
-                                        st.metric("Return on Equity", f"{roe_percentage:.1f}%", help="Higher is better. >15% is typically good.")
+                                        st.metric("Return on Equity", f"{roe_percentage:.1f}%")
                                         st.caption(f"Status: {roe_status}")
                                     
                                     with health_cols[1]:
-                                        # Debt to Equity indicator
                                         de_status = "🟢 Low Debt" if de_ratio < 0.5 else "🟡 Moderate Debt" if de_ratio < 1 else "🔴 High Debt"
-                                        st.metric("Debt to Equity", f"{de_ratio:.2f}", help="Lower is typically better. <1 is good for most industries.")
+                                        st.metric("Debt to Equity", f"{de_ratio:.2f}")
                                         st.caption(f"Status: {de_status}")
                                     
                                     with health_cols[2]:
-                                        # Current Ratio indicator
                                         cr_status = "🟢 Strong Liquidity" if current_ratio > 1.5 else "🟡 Adequate Liquidity" if current_ratio > 1 else "🔴 Liquidity Concern"
-                                        st.metric("Current Ratio", f"{current_ratio:.2f}", help="Higher is typically better. >1.5 is generally good.")
+                                        st.metric("Current Ratio", f"{current_ratio:.2f}")
                                         st.caption(f"Status: {cr_status}")
                                 
-                                    # Full report in expander
                                     with st.expander("📋 View Detailed Valuation Report"):
                                         report = model.generate_report()
                                         st.text_area("Full Report", report, height=400)
                                         
-                                        # Add download button for the report
                                         report_io = StringIO()
                                         report_io.write(report)
                                         
@@ -308,7 +264,99 @@ with tab1:
                                             mime="text/plain"
                                         )
                                     
-                                    pass
+                                    st.subheader("📈 Technical Analysis")
+                                    
+                                    full_ticker = ticker_symbol
+                                    if exchange == "NSE (India)":
+                                        full_ticker = f"{ticker_symbol}.NS"
+                                    elif exchange == "NYSE (US)":
+                                        full_ticker = f"{ticker_symbol}"
+                                    elif exchange == "NASDAQ (US)":
+                                        full_ticker = f"{ticker_symbol}"
+                                    
+                                    st.info(f"Analyzing technical indicators for {full_ticker} with fair value of ₹{result['intrinsic_value']:,.2f}")
+                                    
+                                    try:
+                                        with st.spinner("Generating technical analysis..."):
+                                            from backend.technical_analysis import analyze_stock
+                                            
+                                            tech_result, fig, recommendation_text = analyze_stock(
+                                                ticker=full_ticker,
+                                                fair_value=result['intrinsic_value']
+                                            )
+                                            
+                                            st.pyplot(fig)
+                                            
+                                            with st.expander("📊 Technical Analysis Recommendation", expanded=True):
+                                                st.markdown(f"**RECOMMENDATION:** {tech_result.entry_strategy}")
+                                                st.markdown(f"**Confidence Score:** {tech_result.confidence_score}/100")
+                                                st.markdown("**REASONING:**")
+                                                st.markdown(tech_result.reasoning)
+                                                
+                                                # Create tabs for Buy and Sell zones
+                                                buy_tab, sell_tab = st.tabs(["Buy Zones", "Sell Zones"])
+                                                
+                                                with buy_tab:
+                                                    # Buy zones in a table format
+                                                    buy_data = []
+                                                    for confidence in ["High", "Medium", "Low"]:
+                                                        zones = [z for z in tech_result.buying_zones if z.confidence == confidence]
+                                                        for z in sorted(zones, key=lambda x: x.lower):
+                                                            buy_data.append({
+                                                                "Confidence": confidence,
+                                                                "Price Range": f"₹{z.lower:.2f} - ₹{z.upper:.2f}",
+                                                                "Description": z.description
+                                                            })
+                                                    
+                                                    if buy_data:
+                                                        buy_df = pd.DataFrame(buy_data)
+                                                        # Style the dataframe for better visual appeal
+                                                        def highlight_confidence(val):
+                                                            if val == "High":
+                                                                return 'background-color: #004d00; color: white'
+                                                            elif val == "Medium":
+                                                                return 'background-color: #00b300; color: white'
+                                                            elif val == "Low":
+                                                                return 'background-color: #99ff99; color: black'
+                                                            return ''
+                                                        
+                                                        styled_buy_df = buy_df.style.map(highlight_confidence, subset=['Confidence'])
+                                                        st.dataframe(styled_buy_df, hide_index=True, use_container_width=True)
+                                                    else:
+                                                        st.write("No buy zones identified")
+                                                
+                                                with sell_tab:
+                                                    # Sell zones in a table format
+                                                    sell_data = []
+                                                    for confidence in ["High", "Medium", "Low"]:
+                                                        zones = [z for z in tech_result.selling_zones if z.confidence == confidence]
+                                                        for z in sorted(zones, key=lambda x: x.lower):
+                                                            sell_data.append({
+                                                                "Confidence": confidence,
+                                                                "Price Range": f"₹{z.lower:.2f} - ₹{z.upper:.2f}",
+                                                                "Description": z.description
+                                                            })
+                                                    
+                                                    if sell_data:
+                                                        sell_df = pd.DataFrame(sell_data)
+                                                        # Style the dataframe for better visual appeal
+                                                        def highlight_confidence(val):
+                                                            if val == "High":
+                                                                return 'background-color: #990000; color: white'
+                                                            elif val == "Medium":
+                                                                return 'background-color: #ff3333; color: white'
+                                                            elif val == "Low":
+                                                                return 'background-color: #ffb3b3; color: black'
+                                                            return ''
+                                                        
+                                                        styled_sell_df = sell_df.style.map(highlight_confidence, subset=['Confidence'])
+                                                        st.dataframe(styled_sell_df, hide_index=True, use_container_width=True)
+                                                    else:
+                                                        st.write("No sell zones identified")
+                                            
+                                    except Exception as e:
+                                        st.error(f"Error running technical analysis: {str(e)}")
+                                        st.error("Please check if the ticker symbol is correct or try again later.")
                 
             except ValueError as ve:
                 st.error(f"Invalid input: {ve}")
@@ -346,14 +394,26 @@ with tab2:
     """
     st.markdown(metrics_md)
     
+    st.subheader("About Technical Analysis")
+    st.markdown("""
+    The technical analysis section identifies key buy and sell zones based on:
+    
+    - **Moving Averages**: 50-day, 100-day, and 200-day
+    - **Support Levels**: Historical price clusters where buyers entered
+    - **Resistance Levels**: Historical price levels where selling pressure increased
+    - **Momentum Indicators**: RSI (Relative Strength Index) and other technical signals
+    - **Fibonacci Levels**: Key retracement and extension levels
+    
+    The color intensity in the chart indicates the confidence level - darker green shows stronger buy zones (at lower prices) and darker red shows stronger sell zones (at higher prices).
+    """)
+    
     st.subheader("About This Tool")
     st.markdown("""
-    This valuation tool uses multiple methods to estimate a stock's intrinsic value. It's designed to help investors make more informed decisions by providing a comprehensive analysis of a stock's value from different perspectives.
+    This valuation tool uses multiple methods to estimate a stock's intrinsic value, combined with technical analysis to identify optimal entry and exit points. It's designed to help investors make more informed decisions by providing a comprehensive analysis of a stock's value from both fundamental and technical perspectives.
     
     **Disclaimer**: This tool provides estimates based on the data you input. These estimates should not be considered as investment advice. Always do your own research or consult a financial advisor before making investment decisions.
     """)
     
-# Footer
 st.markdown("---")
 
 col1, col2, col3 = st.columns([1, 1, 1])
