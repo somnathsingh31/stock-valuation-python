@@ -1,3 +1,14 @@
+---
+title: NiveshLakshya
+emoji: 📊
+colorFrom: indigo
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
+
 # 📊 NiveshLakshya
 
 [![HuggingFace Spaces](https://img.shields.io/badge/Hosted%20on-HuggingFace-%23ff8a65)](https://huggingface.co/spaces/somnathsingh31/NiveshLakshya)
